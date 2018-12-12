@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Kubernetes App</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    </head>
+    <body>
+        <div class="page">
+            {% block particular %}{% endblock %}
+        </div>
+        <div class=bottom>
+            <img src="static/capside.png" height=60px>
+        </div>
+    </body>
+</html>

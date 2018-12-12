@@ -1,0 +1,23 @@
+{% extends "plantillappal.html" %}
+{% block particular %}
+        <h1>{{ params['name'] }}</h1>
+        <div class="cajita">
+            <div>
+                <br>
+                <img src="../static/elementos/{{ params['symbol']+'.gif' }}" alt="Este espectro no anda bien ..." height="85px" border="1px" >
+                <br>
+            </div>
+            <div class="cajitaleftelemento">
+                Simbolo  <br>
+                Numero Atomico <br>
+                Masa Atomica <br>
+            </div>
+            <div class="cajitarightelemento">
+                {{ params['symbol'] }} <br>
+                {{ params['number'] }} <br>
+                {{ params['atomic_mass'] }} <br>
+            </div>
+
+        </div>
+        <br><br><a href="{{ params['source'] }}" style="color: white;" target="_blank">{{ params['source'] }}</a>
+{% endblock %}

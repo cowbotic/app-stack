@@ -1,0 +1,16 @@
+{% extends "plantillappal.html" %}
+{% block particular %}
+        <h1>Datos del visitante</h1>
+        <div class="cajita">
+            <p style="font-size: 80%"><font face="hack">IP: {{ params['ip'] }} </font></p>
+            <p style="font-size: 80%"><font face="hack">Pais: {{ params['country'] }} </font></p>
+            <p style="font-size: 80%"><font face="hack">Region: {{ params['region'] }}</font></p>
+            <p style="font-size: 80%"><font face="hack">Proveedor: {{ params['isp'] }}</font></p>
+        </div>
+        <h1>Datos del Pod en AKS</h1>
+        <div class="cajita">
+            <p style="font-size: 80%"><font face="hack">Hostname: {{ params['hostname'] }}</font></p>
+            <p style="font-size: 80%"><font face="hack">Container IP: {{ params['cont_ip'] }}</font></p>
+            <p style="font-size: 80%"><font face="hack">External IP: {{ params['pub_cont_ip'] }}</font></p>
+        </div>
+{% endblock %}

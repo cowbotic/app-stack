@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css?family=Bangers|Cinzel|Inconsolata|Fira+Sans+Extra+Condensed:300,400|Spicy+Rice');
+
+body            { background: white; }
+a, h1, h2       { color: #377BA8; }
+h1, h2          { font-family: 'Cinzel', bold; margin: 0; }
+h1              { border-bottom: 2px solid #eee; font-size: 4em;}
+h2              { font-size: 1.2em; }
+
+.page           { font-family: 'Fira Sans Extra Condensed', sans-serif; margin: 2em auto; width: 60em; border: 5px solid #698e00;
+                  padding: 0.8em; background: #060606; color: white; }
+.entries        { list-style: none; margin: 0; padding: 0; }
+.entries li     { margin: 0.8em 1.2em; }
+.entries li h2  { margin-left: -1em; }
+.add-entry      { font-size: 0.9em; border-bottom: 1px solid #ccc; }
+.add-entry dl   { font-weight: bold; }
+.metanav        { text-align: right; font-size: 0.8em; padding: 0.3em;
+                  margin-bottom: 1em; background: #fafafa; }
+.cajita         { font-size: 150%; padding: 2em; height: 240px;}
+.cajitaleft     { position: relative; width: 35%; float: left;}
+.cajitaright    { position: relative; width: 60%; float: right; font-family: 'Inconsolata'; color: #377BA8; font-size: 150%}
+.cajitaleftelemento     { position: relative; width: 25%; float: left;}
+.cajitarightelemento    { position: relative; width: 60%; float: right;}
+.cajaza         { font-size: 150%; padding: 2em; background: silver; text-align: center;}
+.flash          { background: #CEE5F5; padding: 0.5em;
+                  border: 1px solid #AACBE2; }
+.button         { border-radius: 60%; font-size: 18px; margin: 4px 4px; padding: 8px 8px;
+                  font-family: 'Bangers', cursive; border: 2px solid #377BA8; color: #377BA8; box-shadow: 0 4px #377BAA;}
+.button:hover   { background-color: white; }
+.button:active  { transform: translateY(3px);box-shadow: 0 3px #377BAA;}
+.error          { background: #F0D6D6; padding: 0.5em; }
+.bottom         { position: absolute; right: 10px; bottom: 5px; }
+.center         { margin:auto; margin-left: auto; margin-right: auto;}
+
+.basic-grey {
+    margin-left:auto;
+    margin-right:auto;
+    max-width: 1200px;
+    background: #F7F7F7;
+    padding: 25px 15px 25px 10px;
+    color: #888;
+    text-shadow: 1px 1px 1px #FFF;
+    border:1px solid #E4E4E4;
+}
+.basic-grey h1 {
+    font-size: 25px;
+    padding: 0px 0px 10px 40px;
+    display: block;
+    border-bottom:1px solid #E4E4E4;
+    margin: -10px -15px 30px -10px;;
+    color: #888;
+}
+.basic-grey h1>span {
+    display: block;
+    font-size: 18px;
+}
+.basic-grey label {
+    display: block;
+    margin: 0px;
+}
+.basic-grey label>span {
+    float: left;
+    width: 45%;
+    text-align: left;
+    padding-right: 10px;
+    margin-top: 10px;
+    color: #377BA8;
+    font-size: 20px;
+    font-family: 'Fira Sans Extra Condensed';
+}
+.basic-grey input[type="text"], .basic-grey input[type="email"], .basic-grey textarea, .basic-grey select {
+    border: 1px solid #DADADA;
+    color: #888;
+    height: 30px;
+    margin-bottom: 16px;
+    margin-right: 6px;
+    margin-top: 2px;
+    outline: 0 none;
+    padding: 3px 3px 3px 5px;
+    width: 50%;
+    font-size: 18px;
+    line-height:15px;
+    font-family: 'Fira Sans Extra Condensed';
+}
+.basic-grey textarea{
+    padding: 3px 2px 2px 3px;
+}
+.basic-grey select {
+    background: #FFF url('down-arrow.png') no-repeat right;
+    background: #FFF url('down-arrow.png') no-repeat right);
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance: none;
+    text-indent: 0.01px;
+    text-overflow: '';
+    width: 70%;
+    height: 35px;
+    line-height: 25px;
+}
+.basic-grey textarea{
+    height:100px;
+}

@@ -1,0 +1,15 @@
+{% extends "plantillappal.html" %}
+{% block particular %}
+        <h1>{{ params['nombre'] }}</h1>
+        <div class="cajita">
+            <div class="cajitaleft">
+                <img src="static/particulas/{{ params['nombre']+'.jpg' }}" height=180px border="1px" >
+            </div>
+            <div class="cajitaright">
+                masa : {{ params['masa'] }} <br>
+                carga: {{ params['carga'] }} <br>
+                spin : {{ params['spin'] }} <br>
+            </div>
+        </div>
+        <p style="text-align-last: center; color:#698e00; font-size: 200%; ">Familia de los {{ params['tipo'] }}, descubierto en {{ params['descubierto'] }}<p>
+{% endblock %}
