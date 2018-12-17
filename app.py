@@ -1,9 +1,40 @@
+from datetime import datetime
 from flask import Flask, render_template, url_for, request, make_response, jsonify
-import os, socket, sys, random, time, math, functools, requests, json, redis
+import os, socket, sys, random, time, math, functools, requests, json, redis, psutil
 
-from werkzeug.wsgi import DispatcherMiddleware
-from prometheus_client import make_wsgi_app
-from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, REGISTRY
+#Para trazas con OpenCensus contra Jaeger
+from opencensus.trace.tracer import Tracer
+from opencensus.trace import time_event as time_event_module
+from opencensus.trace import status
+from opencensus.trace.exporters.jaeger_exporter import JaegerExporter
+from opencensus.trace.exporters import print_exporter
+from opencensus.trace.exporters.zipkin_exporter import ZipkinExporter
+from opencensus.trace.samplers import always_on
+from opencensus.trace.ext.flask.flask_middleware import FlaskMiddleware
+
+#je = JaegerExporter(service_name="flask-app-exporter-service", host_name='jaeger-server')
+#tracer=Tracer(exporter=je,sampler=always_on.AlwaysOnSampler())
+
+#exporter = print_exporter.PrintExporter()
+#tracer = Tracer(sampler=always_on.AlwaysOnSampler(), exporter=exporter)
+
+zipkin_server='zipkin-server'
+ze = ZipkinExporter(service_name="flask-app",
+                                host_name=zipkin_server,
+                                port=9411,
+                                endpoint='/api/v2/spans')
+
+tracer = Tracer(exporter=ze, sampler=always_on.AlwaysOnSampler())
+
+def traza_main(dict_attr,nombre='ElPadre'):
+  with tracer.span(name='ElPadre') as span:
+    traza(dict_attr) 
+
+def traza(dict_attr={}):
+  with tracer.span() as span: 
+    for elem in dict_attr:
+      tracer.add_attribute_to_current_span(attribute_key=elem, attribute_value=dict_attr[elem])
+
 
 #Cabeceras http modificadas para algunas respuestas en JSON...
 headers={'mimetype':'application/json','Content-Type':'application/json','Server':'Who cares'}
@@ -13,10 +44,14 @@ redis_server = 'redis-server'
 try:
   dstore = redis.Redis(redis_server)
   dstore.ping()
+  dstore.incr('conexiones',1)
   REDIS_UP=True
+  params_redis={"redis":"ready"}
 except redis.ConnectionError:
+  params_redis={"redis":"NOT ready"}
   print('{"redis":"Redis no esta disponible"}')
   REDIS_UP=False
+traza_main(params_redis,'RedisConn')
 
 #Funcion para adivinar la direccion IP del servidor...
 def get_ip_address():
@@ -24,15 +59,30 @@ def get_ip_address():
     s.connect(("8.8.8.8", 80))
     return s.getsockname()[0]
 
+#Contadores para Prometheus
+global hits
+hits=0
+
+global redis_con
+if REDIS_UP:
+  redis_con=dstore.get('conexiones').decode('utf-8')
+else:
+  redis_con=0
+traza_main({'conexiones':str(redis_con)},'RedisCheck')
+
 app = Flask(__name__)
+middleware = FlaskMiddleware(app,exporter=ze)
 
 @app.route('/')
 def hello():
+  global hits
+  hits=hits+1
   params={}
   if request.headers.getlist("X-Forwarded-For"):
     params['ip'] = request.headers.getlist("X-Forwarded-For")[0]
   else:
    params['ip'] = request.remote_addr
+
   
   datos_ip=requests.get('http://ip-api.com/json/'+params['ip'])
   
@@ -40,16 +90,39 @@ def hello():
     params['country']=datos_ip.json()['country']
     params['region']=datos_ip.json()['regionName']
     params['isp']=datos_ip.json()['isp']
-
+  
   else:
     params['country']='desconocido'
     params['region']='desconocido'
     params['isp']='desconocido'
-
+  
   params['cont_ip']=get_ip_address()
   params['pub_cont_ip']=requests.get('http://ident.me').text
   params['hostname']=socket.gethostname()
+
   return render_template('hello.html', params=params)
+
+@app.route('/fake')
+def fake():
+  global hits
+  hits=hits+1
+  
+  params={}
+  params['ip']          = request.remote_addr
+  params['country' ]    = 'loccitan'
+  params['region']      = 'zenda'
+  params['isp']         = 'Conde Olaf Telecom'
+  params['cont_ip']     = '10.1.2.3'
+  params['pub_cont_ip'] = '1.2.3.4'
+  params['hostname']    = socket.gethostname()
+  params['hora']        = str(datetime.now())
+  params['random']      = str(random.randrange(1,200))
+  params['hora_requ']   = str(request.date)
+  params['method']      = request.method
+  
+  traza_main(params,"/fake")  
+  return render_template('hello.html', params=params)
+
 
 @app.route('/healthz')
 def healthz():
@@ -63,7 +136,7 @@ def healthz():
 @app.route('/redis')
 def redis():
   if REDIS_UP:
-    dstore.incr('conexiones',1)
+    #dstore.incr('conexiones',1)
     dato=dstore.get('conexiones').decode('utf-8')
     resp=make_response('{"conexiones":'+str(dato)+',"Servidor":"'+socket.gethostname()+'"}')
   else:
@@ -160,28 +233,26 @@ def elementosvisitados():
   resp=make_response(jsonify(resp_dict),headers)
   return resp
 
-@app.route('/prueba')
-def prueba():
-  return('# HELP tonterias_varias_total las tonterias\n\
-# TYPE tonterias_varias_total counter\n\
-tonterias_varias_total 28.1\n\
-# HELP tonterias_varias_otras las tonterias\n\
-# TYPE tonterias_otras_total counter\n\
-tonterias_otras_total 43.34\n')
+@app.route('/metrics')
+def metrics():
+  global hits
+  global redis_con
 
-#Instrumentacion con Prometheus
-class CustomCollector(object):
-    def collect(self):
-        c=CounterMetricFamily('redis_con', 'las conexiones de redis', value=float(dstore.get('conexiones').decode('utf-8')))
-        yield c
+  return('# HELP hits_total El total de hits en la raiz\n\
+# TYPE hits_total counter\n\
+hits_total '+str(hits)+'\n\
+# HELP redis_connections_total El total de conexiones que se han hecho a redis\n\
+# TYPE redis_connections_total counter\n\
+redis_connections_total '+str(redis_con)+'\n\
+# HELP uso de CPU \n\
+# TYPE cpu_gauge gauge\n\
+cpu_gauge '+str(psutil.cpu_percent())+'\n\
+# HELP uso de memoria gauge\n\
+# TYPE mem_gauge gauge\n\
+mem_gauge '+str(psutil.virtual_memory().percent)+'\n')
 
-REGISTRY.register(CustomCollector())
-app_dispatch = DispatcherMiddleware(app, {'/metrics': make_wsgi_app()})
-#/Instrumentacion con Prometheus
-#Para que funcione, arrancar con 
-#uwsgi --http 192.168.56.1:5000 --wsgi-file app.py --callable app_dispatch
 
 if __name__ == '__main__':
-  app.run()
+  app.run(host='0.0.0.0')
 
 
