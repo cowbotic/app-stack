@@ -73,7 +73,17 @@ traza_main({'conexiones':str(redis_con)},'RedisCheck')
 app = Flask(__name__)
 middleware = FlaskMiddleware(app,exporter=ze)
 
+
 @app.route('/')
+def home():
+  body={'status':200,'todo':'bien','Redis':str(REDIS_UP)}
+  status=body['status']
+  headers={'mimetype':'application/json','Content-Type':'application/json'}
+
+  resp=make_response((jsonify(body), status, headers))
+  return resp
+
+@app.route('/hello')
 def hello():
   global hits
   hits=hits+1

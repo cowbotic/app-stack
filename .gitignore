@@ -31,3 +31,7 @@ $RECYCLE.BIN/
 
 #All under utils directory
 /utils/*
+
+#All tests
+prueba*.*
+prueba.*
