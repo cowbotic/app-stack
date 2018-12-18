@@ -32,4 +32,4 @@ COPY config_files/python_libraries.txt ${APP_DIR}/python_libraries.txt
 EXPOSE 80
 
 # exectute start up script
-ENTRYPOINT ["/start_flask_app.sh"]
+ENTRYPOINT ["bash","/start_flask_app.sh"]
