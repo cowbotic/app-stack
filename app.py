@@ -58,7 +58,7 @@ if try_redis:
     REDIS_UP=True
     params_redis={"redis":"ready"}
   except Exception:
-    print('{"redis":"--Redis no esta disponible--"}')
+    print('{"redis":"--Redis no esta disponible##"}')
     params_redis={"redis":"NOT running"}
   if TRAZAS:
     traza_main(params_redis,'RedisConn')
