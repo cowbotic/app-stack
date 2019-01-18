@@ -1,0 +1,266 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-stack-web-depl
+  namespace: marions
+  labels: 
+    app: app-stack-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-stack-web
+  template:
+    metadata:
+      labels:
+        app: app-stack-web
+    spec:
+      containers:
+      - name: app-stack-web
+        image: eu.gcr.io/poc-gke-spinnaker/app-stack-web:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: app-stack-web-lb
+    usage: loadbalance
+  name: app-stack-web-srvc
+  namespace: marions
+spec:
+  type: LoadBalancer
+  selector:
+    app: app-stack-web
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zipkin-server-depl
+  namespace: marions
+  labels: 
+    app: zipkin-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zipkin-server
+  template:
+    metadata:
+      labels:
+        app: zipkin-server
+    spec:
+      containers:
+      - name: zipkin-server
+        image: jaegertracing/all-in-one:latest
+        env:
+        - name: COLLECTOR_ZIPKIN_HTTP_PORT
+          value: "9411"
+        ports:
+        - containerPort: 5775
+          protocol: UDP
+        - containerPort: 6831
+          protocol: UDP
+        - containerPort: 6831
+          protocol: TCP
+        - containerPort: 6832
+          protocol: UDP
+        - containerPort: 5778
+          protocol: UDP
+        - containerPort: 5778
+          protocol: TCP
+        - containerPort: 16686
+          protocol: UDP
+        - containerPort: 16686
+          protocol: TCP
+        - containerPort: 14268
+          protocol: UDP
+        - containerPort: 14268
+          protocol: TCP
+        - containerPort: 9411
+          protocol: UDP
+        - containerPort: 9411
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: zipkin-server-service
+  name: zipkin-server
+  namespace: marions
+spec:
+  selector:
+    app: zipkin-server
+  ports:
+  - name: udp-5775
+    protocol: UDP
+    port: 5775
+    targetPort: 5775
+  - name: udp-6831
+    protocol: UDP
+    port: 6831
+    targetPort: 6831
+  - name: tcp-6831
+    protocol: TCP
+    port: 6831
+    targetPort: 6831
+  - name: udp-6832
+    protocol: UDP
+    port: 6832
+    targetPort: 6832
+  - name: udp-5778
+    protocol: UDP
+    port: 5778
+    targetPort: 5778
+  - name: tcp-5778
+    protocol: TCP
+    port: 5778
+    targetPort: 5778
+  - name: udp-16686
+    protocol: UDP
+    port: 16686
+    targetPort: 16686
+  - name: tcp-16686
+    protocol: TCP
+    port: 16686
+    targetPort: 16686
+  - name: udp-14268
+    protocol: UDP
+    port: 14268    
+    targetPort: 14268
+  - name: tcp-14268
+    protocol: TCP
+    port: 14268    
+    targetPort: 14268
+  - name: udp-9411
+    protocol: UDP
+    port: 9411    
+    targetPort: 9411
+  - name: tcp-9411
+    protocol: TCP
+    port: 9411
+    targetPort: 9411
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-server-depl
+  namespace: marions
+  labels: 
+    app: redis-server
+  annotations: 
+    usage: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-server
+  template:
+    metadata:
+      labels:
+        app: redis-server
+    spec:
+      containers:
+      - name: redis-server
+        image: redis:5.0.2-alpine
+        ports:
+        - containerPort: 6379
+          protocol: TCP
+        - containerPort: 6379
+          protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: redis-server-service
+  name: redis-server
+  namespace: marions
+spec:
+  selector:
+    app: redis-server
+  ports:
+  - name: udp-6379
+    protocol: UDP
+    port: 6379
+    targetPort: 6379
+  - name: tcp-6379
+    protocol: TCP
+    port: 6379
+    targetPort: 6379
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: marions
+  labels:
+    name: prometheus-deployment
+  name: prometheus
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus
+      containers:
+      - image: quay.io/prometheus/prometheus:v1.0.1
+        name: prometheus
+        command:
+        - "/bin/prometheus"
+        args:
+        - "-config.file=/etc/prometheus/prometheus.yml"
+        - "-storage.local.path=/prometheus"
+        - "-storage.local.retention=24h"
+        ports:
+        - containerPort: 9090
+          protocol: TCP
+        volumeMounts:
+        - mountPath: "/prometheus"
+          name: data
+        - mountPath: "/etc/prometheus"
+          name: config-volume
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 500m
+            memory: 2500Mi
+      volumes:
+      - emptyDir: {}
+        name: data
+      - configMap:
+          name: prometheus-config
+        name: config-volume
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: marions
+  name: prometheus-config
+data:
+  prometheus.yml: |
+     global:
+       scrape_interval: 15s
+       scrape_timeout: 10s
+       evaluation_interval: 15s
+     scrape_configs:
+     - job_name: 'mis_pods'
+        metrics_path: /metrics
+        scheme: http
+        kubernetes_sd_configs:
+        - api_servers:
+          - 'https://kubernetes.default.svc'
+          in_cluster: true
+          role: pod
+        relabel_configs:
+        - source_labels: [  __meta_kubernetes_pod_label_app]
+          action: keep
