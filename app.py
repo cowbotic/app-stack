@@ -280,7 +280,7 @@ def redis():
 
 @app.route('/cabeceras')
 def cabeceras():
-  status=200
+  status=201
 
   resp_dict={}
   for elemento in request.headers.keys():
@@ -307,8 +307,5 @@ cpu_gauge '+str(psutil.cpu_percent())+'\n\
 # TYPE mem_gauge gauge\n\
 mem_gauge '+str(psutil.virtual_memory().percent)+'\n')
 
-
 if __name__ == '__main__':
   app.run(host='0.0.0.0')
-
-
