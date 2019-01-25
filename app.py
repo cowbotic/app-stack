@@ -74,7 +74,8 @@ def get_ip_address():
 
 def get_ip_address_data(ip):
   try:
-    return requests.get('http://ip-api.com/json/'+ip, timeout=(3,5)).json()
+    #return requests.get('http://ip-api.com/json/'+ip, timeout=(3,5)).json()
+    return requests.get('http://ip-api.com/json/'+ip, timeout=(3,5))
   except Exception:
     return {'country':'Desconocido','regionName':'Desconocido','isp':'Desconocido'}
 
@@ -109,7 +110,7 @@ def home():
   
   datos_ip=get_ip_address_data(params['ip'])
   
-  if len(set(['country','region','isp']).intersection(datos_ip.keys())) == 3:
+  if len(set(['country','region','isp']).intersection(datos_ip.json().keys())) == 3:
     params['country']=datos_ip.json()['country']
     params['region']=datos_ip.json()['regionName']
     params['isp']=datos_ip.json()['isp']
