@@ -14,6 +14,9 @@ parameters:
 - description: Secret para el build desde GitHub
   name: GITHUB_SECRET
   value: mysecret
+- description: IP publica master
+  name: PUBLIC_IP
+  value: 0.0.0.0
 objects:
 - kind: BuildConfig
   apiVersion: v1
@@ -188,7 +191,7 @@ objects:
     annotations:
       description: Route for application's http service
   spec:
-    host: ruta-app-stack-demo.104.40.229.38.nip.io
+    host: ruta-app-stack-demo.${PUBLIC_IP}.nip.io
     to:
       kind: Service
       name: "${APPLICATION_NAME}"
