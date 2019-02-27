@@ -30,7 +30,7 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-        name: 'app-stack:latest'
+        name: "${APPLICATION_NAME}:latest"
     postCommit: {}
     resources: {}
     runPolicy: Serial
