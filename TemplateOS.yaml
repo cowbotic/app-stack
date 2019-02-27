@@ -5,12 +5,14 @@ metadata:
   annotations:
     description: Desplegamos toda la app en un template
 labels:
-  application: app-stack
   createdBy: todo-en-un-template
 parameters:
 - description: Nombre de la App
   name: APPLICATION_NAME
   value: app-stack
+- description: URL de GitHub
+  name: GITHUB_URL
+  value: https://github.com/???
 - description: Secret para el build desde GitHub
   name: GITHUB_SECRET
   value: mysecret
@@ -21,7 +23,7 @@ objects:
 - kind: BuildConfig
   apiVersion: v1
   metadata:
-    name: "${APPLICATION_NAME}"
+    name: "${APPLICATION_NAME}-build"
   spec:
     failedBuildsHistoryLimit: 5
     nodeSelector: null
@@ -35,7 +37,7 @@ objects:
     source:
       git:
         ref: master
-        uri: 'https://github.com/cowbotic/app-stack.git'
+        uri: ${GITHUB_URL}
       type: Git
     strategy:
       dockerStrategy: {}
@@ -191,7 +193,7 @@ objects:
     annotations:
       description: Route for application's http service
   spec:
-    host: ruta-app-stack-demo.${PUBLIC_IP}.nip.io
+    host: ruta-${APPLICATION_NAME}.${PUBLIC_IP}.nip.io
     to:
       kind: Service
       name: "${APPLICATION_NAME}"
