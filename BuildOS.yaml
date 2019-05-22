@@ -1,27 +1,30 @@
 kind: BuildConfig
-apiVersion: v1
+apiVersion: build.openshift.io/v1
 metadata:
   name: buildito
+  namespace: mario
+  labels:
+    name: buildito
 spec:
-  failedBuildsHistoryLimit: 5
   nodeSelector: null
   output:
     to:
       kind: ImageStreamTag
       name: 'app-stack:latest'
-  postCommit: {}
   resources: {}
-  runPolicy: Serial
-  source:
-    git:
-      ref: master
-      uri: 'https://github.com/cowbotic/app-stack.git'
-    type: Git
-  strategy:
-    dockerStrategy: {}
-    type: Docker
   successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Docker
+    dockerStrategy: {}
+  postCommit: {}
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/cowbotic/app-stack.git'
+      ref: master
   triggers:
-  - type: GitHub
-    github:
-      secret: mysecret
+    - type: GitHub
+      github:
+        secret: mysecret
+  runPolicy: Serial
