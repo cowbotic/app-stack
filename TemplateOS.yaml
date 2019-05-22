@@ -16,7 +16,7 @@ parameters:
 - description: Secret para el build desde GitHub
   name: GITHUB_SECRET
   value: mysecret
-- description: IP publica master
+- description: IP publica LB Infra
   name: PUBLIC_IP
   value: 0.0.0.0
 objects:
