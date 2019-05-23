@@ -112,7 +112,7 @@ objects:
           deploymentconfig: redis-server
       spec:
         containers:
-          - image: redis-server:5.0.2-alpine
+          - image: redis:5.0.2-alpine
             imagePullPolicy: IfNotPresent
             name: redis
             ports:
