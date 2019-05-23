@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Bangers|Cinzel|Inconsolata|Fira+Sans+Extra+Condensed:300,400|Spicy+Rice');
 
-body            { background: red; }
+body            { background: white; }
 a, h1, h2       { color: #377BA8; }
 h1, h2          { font-family: 'Cinzel', bold; margin: 0; }
 h1              { border-bottom: 2px solid #eee; font-size: 4em;}
