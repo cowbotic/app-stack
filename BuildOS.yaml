@@ -28,3 +28,36 @@ spec:
       github:
         secret: mysecret
   runPolicy: Serial
+
+--
+
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: buildito
+  namespace: mario2
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: DockerImage
+      name: 'docker.io/cowbotic/app-stack:latest'
+    pushSecret:
+      name: dockerhub
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Docker
+    dockerStrategy: {}
+  postCommit: {}
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/cowbotic/app-stack.git'
+      ref: master
+  triggers:
+    - type: GitHub
+      github:
+        secret: mysecret
+  runPolicy: Serial
