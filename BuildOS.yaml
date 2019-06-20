@@ -2,7 +2,6 @@ kind: BuildConfig
 apiVersion: build.openshift.io/v1
 metadata:
   name: buildito
-  namespace: mario
   labels:
     name: buildito
 spec:
@@ -34,8 +33,7 @@ spec:
 kind: BuildConfig
 apiVersion: build.openshift.io/v1
 metadata:
-  name: buildito
-  namespace: mario2
+  name: builditoDocker
 spec:
   nodeSelector: null
   output:
